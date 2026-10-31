@@ -27,6 +27,7 @@ from PIL import Image as PILImage
 from openpyxl import Workbook
 from openpyxl.drawing.image import Image as XLImage
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+from openpyxl.worksheet.pagebreak import Break
 
 FONT = "Microsoft YaHei"
 HEADERS = [
@@ -83,7 +84,7 @@ def build(args: argparse.Namespace) -> None:
     os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
     tmp_dir = tempfile.mkdtemp(prefix="shot_frames_")
     img_w = args.image_width
-    img_h = round(img_w * 2 / 3)
+    img_h = None
 
     wb = Workbook()
     ws = wb.active
@@ -171,15 +172,21 @@ def build(args: argparse.Namespace) -> None:
 
         ws.cell(row=r, column=1).font = Font(name=FONT, size=11, bold=True, color="7A5327")
         ws.cell(row=r, column=10).font = Font(name=FONT, size=9, bold=True, color="6D4C2C")
-        ws.row_dimensions[r].height = max(90, round(img_h * 0.75) + 4)
-
-        im = PILImage.open(frame_path).convert("RGB").resize((img_w, img_h), PILImage.LANCZOS)
+        im = PILImage.open(frame_path).convert("RGB")
+        if img_h is None:
+            img_h = max(60, round(img_w * im.height / im.width))
+        ws.row_dimensions[r].height = max(70, round(img_h * 0.75) + 4)
+        im = im.resize((img_w, img_h), PILImage.LANCZOS)
         thumb = os.path.join(tmp_dir, f"thumb_{idx:03d}.jpg")
         im.save(thumb, "JPEG", quality=88, optimize=True)
         img = XLImage(thumb)
         img.width, img.height = img_w, img_h
         ws.add_image(img, f"B{r}")
         r += 1
+
+    for item in (args.breaks or "").split(","):
+        if item.strip():
+            ws.row_breaks.append(Break(id=int(item.strip())))
 
     ws.freeze_panes = "A4"
     ws.print_title_rows = "3:3"
@@ -211,6 +218,7 @@ def main() -> None:
     parser.add_argument("--title", default="Vlog 逆向拆解 · 逐镜脚本")
     parser.add_argument("--meta", default="逐镜拆解｜机位/景别/运镜 + 光线/声音｜仅用于学习分析")
     parser.add_argument("--sheet-name", default="逐镜表")
+    parser.add_argument("--breaks", default="", help="comma-separated row numbers to break after")
     args = parser.parse_args()
 
     if shutil.which(args.ffmpeg) is None and not os.path.exists(args.ffmpeg):
