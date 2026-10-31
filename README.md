@@ -133,10 +133,23 @@ python tools/build_shot_table.py \
 │  └─ scene_detect.py            # 场景检测，输出候选切点
 ├─ examples/
 │  └─ example-shots.csv          # 示例数据（合成场景，非真实视频）
+├─ cases/
+│  └─ fathers-day-vlog-7380698968457645350/
+│     ├─ README.md               # 案例说明
+│     ├─ shot-list.md            # 18 镜文本表
+│     ├─ notes.md                # 关键镜头与复刻笔记
+│     ├─ shots.csv               # 同数据 CSV
+│     └─ fathers-day-shot-table.xlsx  # 纯文本表（无截图）
 ├─ requirements.txt
 ├─ LICENSE                       # 代码：MIT
 └─ LICENSE-docs                  # 文档：CC BY 4.0
 ```
+
+### 案例
+
+- [父亲节 Vlog 逆向拆解（纯文本）](cases/fathers-day-vlog-7380698968457645350/README.md)
+  - 18 镜、55.2 秒；机位/景别/运镜/光线逐镜拆解
+  - 不含原片与截图；附 CSV、Markdown 表和纯文本 Excel
 
 ---
 
